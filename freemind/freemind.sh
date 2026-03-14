@@ -227,9 +227,9 @@ if [ "${JAVA_TYPE}" = "sun" ]
 then
 	_debug "Calling: '${JAVACMD} -Dfreemind.base.dir=${freedir} -cp ${CLASSPATH} freemind.main.FreeMindStarter  $@'."
 	( echo "${DEBUG}" | grep -qe "exit" ) && exit 0 # do not start FreeMind
-	"${JAVACMD}" -Xmx256M -Dfreemind.base.dir="${freedir}" -cp "${CLASSPATH}" freemind.main.FreeMindStarter "$@"
+	"${JAVACMD}" -Xmx256M -Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dfreemind.base.dir="${freedir}" -cp "${CLASSPATH}" freemind.main.FreeMindStarter "$@"
 else # non-Sun environments don't work currently.
 	_debug "Calling: '${JAVACMD} -Dgnu.java.awt.peer.gtk.Graphics=Graphics2D -Dfreemind.base.dir=${freedir} -cp ${CLASSPATH} freemind.main.FreeMindStarter  $@'."
 	( echo "${DEBUG}" | grep -qe "exit" ) && exit 0 # do not start FreeMind
-	"${JAVACMD}" -Xmx256M -Dgnu.java.awt.peer.gtk.Graphics=Graphics2D -Dfreemind.base.dir="${freedir}" -cp "${CLASSPATH}" freemind.main.FreeMindStarter "$@"
+	"${JAVACMD}" -Xmx256M -Dgnu.java.awt.peer.gtk.Graphics=Graphics2D -Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dfreemind.base.dir="${freedir}" -cp "${CLASSPATH}" freemind.main.FreeMindStarter "$@"
 fi

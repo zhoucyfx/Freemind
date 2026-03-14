@@ -7,7 +7,7 @@
 <xsl:template match="/plist/dict">
 	<dict>
 	<xsl:variable name="test" select="./key[text()='CFBundleDocumentTypes']"/>
-	<xsl:value-of select="$test"/>
+	<xsl:variable name="highRes" select="./key[text()='NSHighResolutionCapable']"/>
 	<xsl:choose>
 		<xsl:when test="count($test) &gt; 0 "/>
 		<xsl:otherwise>
@@ -30,9 +30,12 @@
 					<string>Editor</string>
 				</dict>
 			</array>
-			<key>NSHighResolutionCapable</key><true/>
 		</xsl:otherwise>
 	</xsl:choose>
+	<xsl:if test="count($highRes) = 0">
+		<key>NSHighResolutionCapable</key>
+		<true/>
+	</xsl:if>
 	<xsl:apply-templates/>
 	</dict>	
 </xsl:template>

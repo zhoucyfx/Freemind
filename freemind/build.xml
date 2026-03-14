@@ -38,6 +38,8 @@
 	<property name="java_target_version" value="11" />
 	<property name="build.compiler" value="modern" />
 	<property name="appbundler.jar" value = "appbundler-1.0.jar"/>
+	<property name="enable_legacy_macchanges" value="false"/>
+	<property name="macos_runtime_dir" location="${env.JAVA_HOME}"/>
 	<property name="freemind_socket" location="${user.home}/.freemind/freemind.socket"/>
 
 
@@ -139,10 +141,15 @@
 		<xslt style="patterns_updater.xslt" in="patterns.xml" out="patterns_new.xml" force="true" />
 	</target>
 
-	<!-- end generator part -->
+	<condition property="enable_legacy_macchanges_on_mac">
+		<and>
+			<os family="mac"/>
+			<equals arg1="${enable_legacy_macchanges}" arg2="true"/>
+		</and>
+	</condition>
 
-	<target name="build" depends="init,gen">
-		<!-- Perform Mac Changes as a plugin. -->
+	<target name="prepare_legacy_macchanges" if="enable_legacy_macchanges_on_mac">
+		<!-- Legacy plugin depends on deprecated Apple EAWT API and is disabled by default. -->
 		<exec dir="${src}/accessories/plugins" executable="ln" os="Mac OS X">
 			<arg value="-s"/>
 			<arg value="MacChanges.java.not_here"/>
@@ -153,7 +160,11 @@
 			<arg value="MacChanges.xml.not_here"/>
 			<arg value="MacChanges.xml"/>
 		</exec>
-		<!-- end mac changes. -->
+	</target>
+
+	<!-- end generator part -->
+
+	<target name="build" depends="init,gen,prepare_legacy_macchanges">
 		<mkdir dir="${build}"/>
 		<javac includeantruntime="false" srcdir="${src}"
 			destdir="${build}"
@@ -298,7 +309,7 @@
 		            identifier="freemind.main.FreeMind"
 		            mainclassname="freemind.main.FreeMindStarter"
 			>
-			<runtime dir="${env.JAVA_HOME}"/>
+			<runtime dir="${macos_runtime_dir}"/>
 			<classpath dir="${dist}">
 				<include name="**/*.jar" />
 				<include name="." />
@@ -311,6 +322,8 @@
 			<option value="-Xmx512m"/>
 			<option value="-Xss8M"/>
 			<option value="-Dapple.laf.useScreenMenuBar=true"/>
+			<option value="-Dawt.useSystemAAFontSettings=on"/>
+			<option value="-Dswing.aatext=true"/>
 		</bundleapp>
 		<copy todir="${dist_macos_contents}/Resources">
 			<fileset dir="${src}/images">

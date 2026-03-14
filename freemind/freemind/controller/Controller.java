@@ -305,6 +305,45 @@ public class Controller implements MapModuleChangeObserver {
 					+ getProperty("defaultfont") + " - is not available.");
 			frame.setProperty("defaultfont", "SansSerif");
 		}
+		ensureDefaultFontSupportsChineseOnMac();
+	}
+
+	private void ensureDefaultFontSupportsChineseOnMac() {
+		if (!Tools.isMacOsX()) {
+			return;
+		}
+		Font currentDefaultFont = getDefaultFont();
+		if (currentDefaultFont == null) {
+			return;
+		}
+		if (currentDefaultFont.canDisplayUpTo("\u4E2D\u6587") == -1) {
+			return;
+		}
+		String fallback = findCjkCapableFallbackFont();
+		if (fallback == null || fallback.equals(getProperty("defaultfont"))) {
+			return;
+		}
+		logger.info("Switching default font from '" + getProperty("defaultfont")
+				+ "' to '" + fallback + "' for better Chinese rendering on macOS.");
+		frame.setProperty("defaultfont", fallback);
+	}
+
+	private String findCjkCapableFallbackFont() {
+		String[] candidates = new String[] { "PingFang SC", "Hiragino Sans GB",
+				"Songti SC", "Heiti SC", "STHeiti", "Arial Unicode MS",
+				"Dialog", "SansSerif" };
+		int style = getDefaultFontStyle();
+		int size = Math.max(getDefaultFontSize(), 12);
+		for (String candidate : candidates) {
+			if (!Tools.isAvailableFontFamily(candidate)) {
+				continue;
+			}
+			Font candidateFont = new Font(candidate, style, size);
+			if (candidateFont.canDisplayUpTo("\u4E2D\u6587") == -1) {
+				return candidate;
+			}
+		}
+		return null;
 	}
 
 	//
